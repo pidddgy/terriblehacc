@@ -18,7 +18,7 @@ export default class CameraExample extends React.Component {
     this.timer = setInterval(() => {
       this.snapPhoto();
       console.log("HI");
-    }, 1000);
+    }, 500);
   }
 
   async snapPhoto() {
@@ -42,7 +42,7 @@ export default class CameraExample extends React.Component {
         //console.log(b64);
 
         console.log('sending request');
-        fetch("http://40.87.15.66:4200/img/" + b64).then(async (response) => {
+        fetch("http://10.36.29.210:4200/img/" + b64).then(async (response) => {
           //console.log("HI");
           //console.log(response.json());
           response.json().then(async (body) => {
@@ -51,7 +51,7 @@ export default class CameraExample extends React.Component {
             let { errors, data } = body;
             data = parseFloat(data);
             console.log(`Got brightness: ${data}`);
-            if (data <= 120) {
+            if (data <= 100) {
               dark = true;
             }
             else {
@@ -63,7 +63,7 @@ export default class CameraExample extends React.Component {
               const soundObject = new Audio.Sound();
               try {
                 await soundObject.loadAsync(require('./assets/scream.mp3'));
-                await soundObject.playAsync();
+                await soundObject.playAsync()
                 console.log("playing");
                 // Your sound is playing!
               } catch (error) {
