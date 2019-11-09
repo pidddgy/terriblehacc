@@ -2,6 +2,8 @@ import React from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera';
+import { Audio } from 'expo-av';
+
 
 export default class CameraExample extends React.Component {
   state = {
@@ -16,6 +18,7 @@ export default class CameraExample extends React.Component {
   }
 
   async snapPhoto() {       
+    var dark = true; // replace with api value
     console.log('Button Pressed');
     if (this.camera) {
        console.log('Taking photo');
@@ -25,6 +28,20 @@ export default class CameraExample extends React.Component {
           photo.exif.Orientation = 1;            
            console.log(photo);            
            });     
+      
+
+      if(dark) {
+        const soundObject = new Audio.Sound();
+        try {
+          await soundObject.loadAsync(require('./assets/scream.mp3'));
+          await soundObject.playAsync();
+          // Your sound is playing!
+        } catch (error) {
+          // An error occurred!
+        }
+      }
+      
+           
      }
     }
 
