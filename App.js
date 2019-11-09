@@ -15,35 +15,67 @@ export default class CameraExample extends React.Component {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     this.setState({ hasCameraPermission: status === 'granted' });
     this.snapPhoto();
+    this.timer = setInterval(() => {
+      this.snapPhoto();
+      console.log("HI");
+    }, 1000);
   }
 
-  async snapPhoto() {       
-    var dark = true; // replace with api value
+  async snapPhoto() {
+    String.prototype.replaceAll = function (search, replacement) {
+      var target = this;
+      return target.replace(new RegExp(search, 'g'), replacement);
+    };
+
+    var dark = false; // replace with api value
+
     console.log('Button Pressed');
     if (this.camera) {
-       console.log('Taking photo');
-       const options = { quality: 1, base64: true, fixOrientation: true, 
-       exif: true};
-       await this.camera.takePictureAsync(options).then(photo => {
-          photo.exif.Orientation = 1;            
-           console.log(photo);            
-           });     
-      
+      console.log('Taking photo');
+      const options = {
+        quality: 0, base64: true, fixOrientation: true,
+        exif: true
+      };
+      await this.camera.takePictureAsync(options).then(photo => {
+        photo.exif.Orientation = 1;
+        var b64 = photo.base64.replaceAll("/", "-");
+        //console.log(b64);
 
-      if(dark) {
-        const soundObject = new Audio.Sound();
-        try {
-          await soundObject.loadAsync(require('./assets/scream.mp3'));
-          await soundObject.playAsync();
-          // Your sound is playing!
-        } catch (error) {
-          // An error occurred!
-        }
-      }
-      
-           
-     }
+        console.log('sending request');
+        fetch("http://40.87.15.66:4200/img/" + b64).then(async (response) => {
+          //console.log("HI");
+          //console.log(response.json());
+          response.json().then(async (body) => {
+            //console.log('got respnse');
+            //console.log(data);
+            let { errors, data } = body;
+            data = parseFloat(data);
+            console.log(`Got brightness: ${data}`);
+            if (data <= 120) {
+              dark = true;
+            }
+            else {
+              dark = false;
+            }
+
+            if (dark) {
+              console.log("hi");
+              const soundObject = new Audio.Sound();
+              try {
+                await soundObject.loadAsync(require('./assets/scream.mp3'));
+                await soundObject.playAsync();
+                console.log("playing");
+                // Your sound is playing!
+              } catch (error) {
+                // An error occurred!
+                console.log(error);
+              }
+            }
+          })
+        })
+      });
     }
+  }
 
 
 
@@ -57,7 +89,7 @@ export default class CameraExample extends React.Component {
     } else {
       return (
         <View style={{ flex: 1 }}>
-          <Camera style={{ flex: 1 }} ref={ (ref) => {this.camera = ref} } type={this.state.type}>
+          <Camera style={{ flex: 1 }} ref={(ref) => { this.camera = ref }} type={this.state.type}>
             <View
               style={{
                 flex: 1,
@@ -78,6 +110,9 @@ export default class CameraExample extends React.Component {
               </TouchableOpacity>
             </View>
           </Camera>
+          <Text>
+
+          </Text>
         </View>
       );
     }
